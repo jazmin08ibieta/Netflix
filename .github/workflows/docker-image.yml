@@ -1,0 +1,32 @@
+name: Deploy Netflix Streamlit Docker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Verificar Docker
+        run: |
+          docker --version
+          docker compose version
+
+      - name: Detener versión anterior
+        run: |
+          docker compose down || true
+
+      - name: Construir y levantar Streamlit
+        run: |
+          docker compose up -d --build
+
+      - name: Revisar contenedor
+        run: |
+          docker ps

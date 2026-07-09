@@ -1,0 +1,7 @@
+services:
+  netflix-streamlit:
+    build: .
+    container_name: netflix-streamlit
+    ports:
+      - "8501:8501"
+    restart: always
