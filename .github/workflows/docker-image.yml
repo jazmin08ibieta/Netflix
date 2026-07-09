@@ -22,6 +22,8 @@ jobs:
       - name: Detener versión anterior
         run: |
           docker compose down || true
+          docker ps -q --filter "publish=8501" | xargs -r docker stop || true
+          docker ps -aq --filter "publish=8501" | xargs -r docker rm || true
 
       - name: Construir y levantar Streamlit
         run: |
