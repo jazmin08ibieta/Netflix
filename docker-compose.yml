@@ -3,5 +3,5 @@ services:
     build: .
     container_name: netflix-streamlit
     ports:
-      - "8502:8501"
+      - "8501:8501"
     restart: always
