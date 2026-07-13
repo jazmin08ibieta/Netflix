@@ -20,7 +20,7 @@ st.set_page_config(
 # CONFIGURACIÓN S3
 # =========================================================
 S3_BUCKET = os.getenv("S3_BUCKET", "xideralaws-curso-jazmin-ibieta")
-S3_KEY = os.getenv("S3_KEY", "taxisNY/kpis/nyc_taxi_kpis.json")
+S3_KEY = os.getenv("S3_KEY", "taxisNY/raw/kpis/nyc_taxi_kpis.json")
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 LOCAL_JSON = os.getenv("LOCAL_JSON", "nyc_taxi_kpis.json")
 
