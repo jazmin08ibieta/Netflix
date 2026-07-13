@@ -1,28 +1,41 @@
 import json
+import os
 from io import BytesIO
 
 import boto3
 import pandas as pd
 import streamlit as st
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import (
+    BotoCoreError,
+    ClientError,
+    NoCredentialsError
+)
 
 
 st.set_page_config(
-    page_title="Titanic con AWS!",
+    page_title="Titanic con AWS",
     page_icon="🚢",
     layout="wide"
 )
 
-# Rutas reales de tu bucket de Amazon S3.
+
 BUCKET = "xideralaws-curso-jazmin-ibieta"
 CSV_KEY = "tictanic.csv"
 SUMMARY_KEY = "titanic/resumen_titanic.json"
 
+AWS_REGION = os.getenv("AWS_REGION", "us-west-2")
+
+
+def crear_cliente_s3():
+    return boto3.client(
+        "s3",
+        region_name=AWS_REGION
+    )
+
 
 @st.cache_data(ttl=300)
 def cargar_csv_desde_s3():
-    """Lee el archivo original del Titanic desde S3 usando boto3."""
-    s3 = boto3.client("s3")
+    s3 = crear_cliente_s3()
 
     response = s3.get_object(
         Bucket=BUCKET,
@@ -30,25 +43,37 @@ def cargar_csv_desde_s3():
     )
 
     contenido = response["Body"].read()
-    return pd.read_csv(BytesIO(contenido))
+
+    return pd.read_csv(
+        BytesIO(contenido)
+    )
 
 
 @st.cache_data(ttl=300)
 def cargar_resumen_desde_s3():
-    """Lee el resumen generado por Lambda desde S3 usando boto3."""
-    s3 = boto3.client("s3")
+    s3 = crear_cliente_s3()
 
     response = s3.get_object(
         Bucket=BUCKET,
         Key=SUMMARY_KEY
     )
 
-    contenido = response["Body"].read().decode("utf-8")
+    contenido = (
+        response["Body"]
+        .read()
+        .decode("utf-8")
+    )
+
     return json.loads(contenido)
 
 
 st.title("🚢 Titanic Dataset")
-st.caption("Amazon S3 → AWS Lambda con boto3 → Amazon S3 → Streamlit")
+
+st.caption(
+    "Amazon S3 → AWS Lambda con boto3 → "
+    "Amazon S3 → Streamlit"
+)
+
 
 try:
     df = cargar_csv_desde_s3()
@@ -82,6 +107,7 @@ try:
     )
 
     st.subheader("Datos del Titanic")
+
     st.dataframe(
         df,
         use_container_width=True,
@@ -122,13 +148,24 @@ try:
     st.subheader("Resumen generado por Lambda")
     st.json(resumen)
 
-except (ClientError, BotoCoreError) as error:
-    st.error("No se pudieron leer los archivos desde Amazon S3.")
-    st.code(str(error))
+
+except NoCredentialsError:
+    st.error("No se encontraron las credenciales de AWS.")
     st.info(
-        "Revisa los permisos s3:GetObject del rol de EC2, "
-        "el nombre del bucket y las rutas de los archivos."
+        "Revisa que el archivo .env esté entrando "
+        "correctamente al contenedor."
     )
+
+
+except ClientError as error:
+    st.error("Amazon S3 rechazó la solicitud.")
+    st.code(str(error))
+
+
+except BotoCoreError as error:
+    st.error("Ocurrió un error al conectar con AWS.")
+    st.code(str(error))
+
 
 except Exception as error:
     st.error("Ocurrió un error al mostrar los datos.")
