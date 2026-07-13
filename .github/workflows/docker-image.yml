@@ -25,6 +25,12 @@ jobs:
           docker ps -q --filter "publish=8501" | xargs -r docker stop || true
           docker ps -aq --filter "publish=8501" | xargs -r docker rm || true
 
+      - name: Crear archivo de variables AWS
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+
       - name: Construir y levantar Streamlit
         run: |
           docker compose up -d --build
