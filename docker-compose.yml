@@ -4,4 +4,6 @@ services:
     container_name: netflix-streamlit
     ports:
       - "8501:8501"
+    env_file:
+      - .env
     restart: always
