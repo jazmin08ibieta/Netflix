@@ -8,7 +8,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 
 st.set_page_config(
-    page_title="Titanic con AWS",
+    page_title="Titanic con AWS!",
     page_icon="🚢",
     layout="wide"
 )
